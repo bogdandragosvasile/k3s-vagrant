@@ -5,9 +5,12 @@ set -euxo pipefail
 # NB this only works when https://github.com/rgl/gitlab-vagrant running at ../gitlab-vagrant
 [ -f /vagrant/tmp/gitlab-runners-registration-token.txt ] || exit 0
 
-gitlab_runner_chart_version="${1:-0.35.0}"; shift || true
-gitlab_fqdn="${1:-gitlab.example.com}"; shift || true
-gitlab_ip="${1:-10.10.9.99}"; shift || true
+gitlab_runner_chart_version="${1:-0.39.0}"
+shift || true
+gitlab_fqdn="${1:-gitlab.example.com}"
+shift || true
+gitlab_ip="${1:-10.10.9.99}"
+shift || true
 gitlab_runner_registration_token="$(cat /vagrant/tmp/gitlab-runners-registration-token.txt)"
 
 # trust the gitlab certificate.
@@ -20,7 +23,7 @@ helm repo update
 
 # search the chart and app versions, e.g.: in this case we are using:
 #     NAME                 CHART VERSION APP VERSION DESCRIPTION
-#     gitlab/gitlab-runner 0.35.0        14.5.0      GitLab Runner
+#     gitlab/gitlab-runner 0.39.0        14.5.0      GitLab Runner
 helm search repo gitlab/gitlab-runner --versions | head -10
 
 # create the namespace.
@@ -38,12 +41,12 @@ kubectl create secret \
   --namespace gitlab-runner \
   --from-file=$gitlab_fqdn.crt=/usr/local/share/ca-certificates/$gitlab_fqdn.crt \
   --dry-run=client \
-  --output yaml \
-  | kubectl apply -f -
+  --output yaml |
+  kubectl apply -f -
 
 # set the configuration.
 # NB the default values are described at:
-#       https://gitlab.com/gitlab-org/charts/gitlab-runner/-/blob/v0.35.0/values.yaml
+#       https://gitlab.com/gitlab-org/charts/gitlab-runner/-/blob/v0.39.0/values.yaml
 #    NB make sure you are seeing the same version of the chart that you are installing.
 cat >gitlab-runner-values.yml <<EOF
 gitlabUrl: https://$gitlab_fqdn

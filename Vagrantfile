@@ -7,29 +7,29 @@ require 'ipaddr'
 def get_or_generate_k3s_token
   # TODO generate an unique random an cache it.
   # generated with openssl rand -hex 32
-  '7e982a7bbac5f385ecbb988f800787bc9bb617552813a63c4469521c53d83b6e'
+  'aa115368ac559177dbc3b670f7e32bf122056729d142639efbf74223f3271c38'
 end
 
 # see https://get.k3s.io/
 # see https://update.k3s.io/v1-release/channels
 # see https://github.com/k3s-io/k3s/releases
 k3s_channel = 'latest'
-k3s_version = 'v1.22.4+k3s1'
+k3s_version = 'v1.23.5+k3s1'
 # see https://github.com/helm/helm/releases
-helm_version = 'v3.7.1'
+helm_version = 'v3.8.1'
 # see https://github.com/roboll/helmfile/releases
-helmfile_version = 'v0.142.0'
+helmfile_version = 'v0.144.0'
 # see https://github.com/kubernetes/dashboard/releases
-k8s_dashboard_version = 'v2.4.0'
+k8s_dashboard_version = 'v2.5.1'
 # see https://github.com/derailed/k9s/releases
-k9s_version = 'v0.25.7'
+k9s_version = 'v0.25.18'
 # see https://github.com/kubernetes-sigs/krew/releases
-krew_version = 'v0.4.2'
+krew_version = 'v0.4.3'
 # see https://github.com/etcd-io/etcd/releases
 # NB make sure you use the same version as k3s.
-etcdctl_version = 'v3.5.0'
+etcdctl_version = 'v3.5.2'
 # see https://gitlab.com/gitlab-org/charts/gitlab-runner/-/tags
-gitlab_runner_chart_version = '0.35.0'
+gitlab_runner_chart_version = '0.39.0'
 # link to the gitlab-vagrant environment (https://github.com/rgl/gitlab-vagrant running at ../gitlab-vagrant).
 gitlab_fqdn = 'gitlab.example.com'
 gitlab_ip = '10.10.9.99'

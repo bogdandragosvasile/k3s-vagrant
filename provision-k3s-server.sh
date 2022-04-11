@@ -1,13 +1,20 @@
 #!/bin/bash
 set -euxo pipefail
 
-k3s_command="$1"; shift
-k3s_channel="${1:-latest}"; shift
-k3s_version="${1:-v1.22.4+k3s1}"; shift
-k3s_token="$1"; shift
-flannel_backend="$1"; shift
-ip_address="$1"; shift
-krew_version="${1:-v0.4.2}"; shift || true # NB see https://github.com/kubernetes-sigs/krew
+k3s_command="$1"
+shift
+k3s_channel="${1:-latest}"
+shift
+k3s_version="${1:-v1.23.5+k3s1}"
+shift
+k3s_token="$1"
+shift
+flannel_backend="$1"
+shift
+ip_address="$1"
+shift
+krew_version="${1:-v0.4.3}"
+shift || true # NB see https://github.com/kubernetes-sigs/krew
 fqdn="$(hostname --fqdn)"
 k3s_url="https://s1.$(hostname --domain):6443"
 
@@ -39,26 +46,25 @@ else
 fi
 
 # install k3s.
-# see server arguments at e.g. https://github.com/k3s-io/k3s/blob/v1.22.4+k3s1/pkg/cli/cmds/server.go#L140
+# see server arguments at e.g. https://github.com/k3s-io/k3s/blob/v1.23.5+k3s1/pkg/cli/cmds/server.go#L140
 # or run k3s server --help
 # see https://rancher.com/docs/k3s/latest/en/installation/install-options/
 # see https://rancher.com/docs/k3s/latest/en/installation/install-options/server-config/
-curl -sfL https://raw.githubusercontent.com/k3s-io/k3s/$k3s_version/install.sh \
-    | \
-        INSTALL_K3S_CHANNEL="$k3s_channel" \
-        INSTALL_K3S_VERSION="$k3s_version" \
-        K3S_TOKEN="$k3s_token" \
-        sh -s -- \
-            server \
-            --node-taint CriticalAddonsOnly=true:NoExecute \
-            --node-ip "$ip_address" \
-            --cluster-cidr '10.12.0.0/16' \
-            --service-cidr '10.13.0.0/16' \
-            --cluster-dns '10.13.0.10' \
-            --cluster-domain 'cluster.local' \
-            --flannel-iface 'eth1' \
-            --flannel-backend $flannel_backend \
-            $k3s_extra_args
+curl -sfL https://raw.githubusercontent.com/k3s-io/k3s/$k3s_version/install.sh |
+  INSTALL_K3S_CHANNEL="$k3s_channel" \
+    INSTALL_K3S_VERSION="$k3s_version" \
+    K3S_TOKEN="$k3s_token" \
+    sh -s -- \
+    server \
+    --node-taint CriticalAddonsOnly=true:NoExecute \
+    --node-ip "$ip_address" \
+    --cluster-cidr '10.12.0.0/16' \
+    --service-cidr '10.13.0.0/16' \
+    --cluster-dns '10.13.0.10' \
+    --cluster-domain 'cluster.local' \
+    --flannel-iface 'eth1' \
+    --flannel-backend $flannel_backend \
+    $k3s_extra_args
 
 # see the systemd unit.
 systemctl cat k3s
@@ -69,7 +75,7 @@ systemctl cat k3s
 k3s check-config || true
 
 # wait for this node to be Ready.
-# e.g. s1     Ready    control-plane,master   3m    v1.22.4+k3s1
+# e.g. s1     Ready    control-plane,master   3m    v1.23.5+k3s1
 $SHELL -c 'node_name=$(hostname); echo "waiting for node $node_name to be ready..."; while [ -z "$(kubectl get nodes $node_name | grep -E "$node_name\s+Ready\s+")" ]; do sleep 3; done; echo "node ready!"'
 
 # wait for the kube-dns pod to be Running.
@@ -83,8 +89,8 @@ $SHELL -c 'while [ -z "$(kubectl get pods --selector k8s-app=kube-dns --namespac
 #       kubectl -n kube-system apply -f /var/lib/rancher/k3s/server/manifests/traefik.yaml
 # see https://doc.traefik.io/traefik/v2.5/operations/api/
 # see https://github.com/k3s-io/k3s/issues/350#issuecomment-511218588
-# see https://github.com/k3s-io/k3s/blob/v1.22.4+k3s1/scripts/download#L47
-# see https://github.com/k3s-io/k3s/blob/v1.22.4+k3s1/manifests/traefik.yaml
+# see https://github.com/k3s-io/k3s/blob/v1.23.5+k3s1/scripts/download#L47
+# see https://github.com/k3s-io/k3s/blob/v1.23.5+k3s1/manifests/traefik.yaml
 # see https://github.com/traefik/traefik-helm-chart/blob/v10.3.0/traefik/values.yaml
 echo 'configuring traefik...'
 apt-get install -y python3-yaml
@@ -205,7 +211,7 @@ kubectl completion bash >/usr/share/bash-completion/completions/kubectl
 ln -s /etc/rancher/k3s/k3s.yaml ~/.kube/config
 
 # save kubeconfig in the host.
-# NB the default users are generated at https://github.com/k3s-io/k3s/blob/v1.22.4+k3s1/pkg/daemons/control/deps/deps.go#L205
+# NB the default users are generated at https://github.com/k3s-io/k3s/blob/v1.23.5+k3s1/pkg/daemons/control/deps/deps.go#L205
 #    and saved at /var/lib/rancher/k3s/server/cred/passwd
 mkdir -p /vagrant/tmp
 python3 - <<EOF
